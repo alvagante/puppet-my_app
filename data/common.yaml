@@ -14,6 +14,14 @@ my_app::user_create: false
 my_app::user_params:
   ensure: present
 
+my_app::group: ~
+my_app::group_create: false
+my_app::group_params:
+  ensure: present
+
+my_app::files: {}
+my_app::options: {}
+
 my_app::resources: {}
 my_app::resources_defaults: {}
 my_app::resources_merge_behaviour: 'deep'
