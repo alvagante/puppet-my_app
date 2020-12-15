@@ -24,5 +24,14 @@ my_app::options: {}
 
 my_app::resources: {}
 my_app::resources_defaults: {}
-my_app::resources_merge_behaviour: 'deep'
-my_app::resources_defaults_merge_behaviour: 'deep'
+
+# For resources and resources_defaults we override the default 'first' merge behaviour 
+lookup_options:
+  my_app::resources:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"
+  my_app::resources_defaults:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"

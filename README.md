@@ -1,117 +1,275 @@
 # my_app
 
-Welcome to your new module. A short overview of the generated parts can be found
-in the [PDK documentation][1].
+This module can be used to manage my_app deployments.
 
-The README template below provides a starting point with details about what
-information to include in your README.
-
+It contains the Puppet code and data to configure the Puppet resources to manage during my_app update and deployment. It's supposed to be self-contained and to be used as a standalone module, in Puppet apply mode.
 ## Table of Contents
 
 1. [Description](#description)
-1. [Setup - The basics of getting started with my_app](#setup)
+2. [Setup - The basics of getting started with my_app](#setup)
     * [What my_app affects](#what-my_app-affects)
-    * [Setup requirements](#setup-requirements)
     * [Beginning with my_app](#beginning-with-my_app)
-1. [Usage - Configuration options and additional functionality](#usage)
-1. [Limitations - OS compatibility, etc.](#limitations)
-1. [Development - Guide for contributing to the module](#development)
+3. [Usage - Configuration options and additional functionality](#usage)
+
 
 ## Description
 
-Briefly tell users why they might want to use your module. Explain what your
-module does and what kind of problems users can solve with it.
+This module manages and configures all the resources related to my_app:
 
-This should be a fairly short description helps the user decide if your module
-is what they want.
+- [Eventual] packages to be installed via Puppet package resource
+- [Eventual] services to be managed via Puppet service resource
+- [Eventual] users to be managed via Puppet user resource
+- Configuration files, managed by Puppet file resource
+
+All these resources are declared in the main my_app class and in evental subclasses based on the Hiera data present in [this same module](data/), configured according to the Hierarchy defined in [hiera.yaml](hiera.yaml).
 
 ## Setup
 
-### What my_app affects **OPTIONAL**
+Normal expected usage of this module is via a Puppet task which runs puppet apply of the class my_app after, eventually, having downloaded the contents of this module on the local node where is applied.
 
-If it's obvious what your module touches, you can skip this section. For
-example, folks can probably figure out that your mysql_instance module affects
-their MySQL instances.
+The script [apply/deploy.sh](apply/deploy.sh) is a shell wrapper around a **puppet task run** command to be executed from central control node which has access to Puppet Enterprise console API. The user running the script need to have a valid
+ token created and not expired (as created via the **puppet access** command) with the permission to run the TASK 
 
-If there's more that they should know about, though, this is the place to
-mention:
+### What my_app affects 
 
-* Files, packages, services, or operations that the module will alter, impact,
-  or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
+This module manages different kind of Puppet resources according what's configured on Hiera.
 
-### Setup Requirements **OPTIONAL**
+The following Hiera keys can be used to managed Puppet resources related to my_app:
 
-If your module requires anything extra before setting up (pluginsync enabled,
-another module, etc.), mention it here.
-
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you might want to include an additional "Upgrading" section here.
+- **my_app::service**, to manage one or more services
+- **my_app::package**, to manage one or more packages
+- **my_app::user**, to manage a user
+- **my_app::group**, to manage a group
+- **my_app::files**, to manage one or more files
+- **my_app::resources**, an altenrative, general purpose, entrypoint to manage any kind of Puppet resource
 
 ### Beginning with my_app
 
-The very basic steps needed for a user to get the module up and running. This
-can include setup steps, if necessary, or it can be an example of the most basic
-use of the module.
+Just include my_app class to allow all the Hiera driven settings described below.
+
+In apply mode, you can just apply the file [apply/my_app.pp](apply/my_app.pp).
+
+This can be done from a central node with access to Puppet Enterprise Console API and a valid token, by running the script [apply/deploy.sh](apply/deploy.sh) passing as argument the node where to apply the code (and deploy my_app).
+
+The file [apply/task_params.json](apply/task_params.json) contains the list of parameters passed to the task profile::puppet_apply.
 
 ## Usage
 
-Include usage examples for common use cases in the **Usage** section. Show your
-users how to use your module to solve problems, and be sure to include code
-examples. Include three to five examples of the most important or common tasks a
-user can accomplish with your module. Show users how to accomplish more complex
-tasks that involve different types, classes, and functions working in tandem.
+To configure what to do with this module you have to edit Hiera settings under [data](data) according to the Hierarchy you can  customise in  [hiera.yaml](hiera.yaml) where you can add any Hierarchy level which uses facts.
 
-## Reference
+### Managing services
 
-This section is deprecated. Instead, add reference information to your code as
-Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your
-module. For details on how to add code comments and generate documentation with
-Strings, see the [Puppet Strings documentation][2] and [style guide][3].
+Services can be managed via a String, an Array or an Hash of services (with key-pairs matching the attributes of Puppet's [service type params](https://puppet.com/docs/puppet/latest/types/service.html)). For example, as a string:
 
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the
-root of your module directory and list out each of your module's classes,
-defined types, facts, functions, Puppet tasks, task plans, and resource types
-and providers, along with the parameters for each.
+    my_app::service: my_app
 
-For each element (class, defined type, function, and so on), list:
+or, as an Array:
 
-* The data type, if applicable.
-* A description of what the element does.
-* Valid values, if the data type doesn't make it obvious.
-* Default value, if any.
+    my_app::service:
+      - my_app
+      - httpd
 
-For example:
+or, as a Hash:
 
-```
-### `pet::cat`
+    my_app::service:
+      my_app:
+        status: '/opt/my_app/bin/my_app status'
+      httpd: {}
 
-#### Parameters
+The default attributes added to each service tyupe (or merged to the ones passed in the my_app::service Hash), can be configured as well. These are the default values:
 
-##### `meow`
+    my_app::service_params:
+      ensure: running
+      enable: true
 
-Enables vocalization in your cat. Valid options: 'string'.
+It's possible to automatically configure a service restart whenever a configuration file changes, as it happens by default:
 
-Default: 'medium-loud'.
-```
+    my_app::service_notify: true
 
-## Limitations
+### Managing packages
 
-In the Limitations section, list any incompatibilities, known issues, or other
-warnings.
+Similarly, packages can be managed via a String, an Array or an Hash of packages (with key-pairs matching the attributes of Puppet's [package type params](https://puppet.com/docs/puppet/latest/types/package.html)). As a String:
 
-## Development
+    my_app::package: my_app
 
-In the Development section, tell other users the ground rules for contributing
-to your project and how they should submit their work.
+as an Array:
 
-## Release Notes/Contributors/Etc. **Optional**
+    my_app::package:
+      - my_app
+      - my_app_prerequisite
 
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel are
-necessary or important to include here. Please use the `##` header.
+or, as Hash:
 
-[1]: https://puppet.com/docs/pdk/latest/pdk_generating_modules.html
-[2]: https://puppet.com/docs/puppet/latest/puppet_strings.html
-[3]: https://puppet.com/docs/puppet/latest/puppet_strings_style.html
+    my_app::package:
+      my_app:
+        ensure: 1.0.1
+      my_app_prerequisite:
+        ensure: present
+
+
+The default parameters added to each package (or merged to the ones present in the Hash of params) are:
+
+    my_app::package_params:
+      ensure: present
+
+### Managing users and groups
+
+Additional Users and groups can be automatically used as owners of the configuration files provided, and eventually created as Puppet Resource.
+
+To set owner and group of each managed file (by default these are not set and files are owned by root):
+
+    my_app::user: my_app
+    my_app::group: my_app
+
+To actually manage the above user and group via the relevant Puppet resources (by default they are not explicitly created):
+
+    my_app::user_create: true
+    my_app::group_create: true
+
+To customise the attributes of Puppet's [user type params](https://puppet.com/docs/puppet/latest/types/user.html) (here are the default values):
+
+    my_app::user_params:
+      ensure: present
+
+To customise the attributes of Puppet's [group type params](https://puppet.com/docs/puppet/latest/types/group.html) (here are the default values):
+
+    my_app::group_params:
+      ensure: present
+
+### Managing configuration files
+
+Any configuration file related to my_app can be configured via an Hash of Puppet file resources with the [relevant attributes](https://puppet.com/docs/puppet/latest/types/file.html): 
+
+    my_app::files:
+      /etc/my_app/my_app.conf:
+        content: template(my_app/my_app.conf.erb)
+      /etc/my_app/auth.conf:
+        content: epp(my_app/auth/auth.conf.epp)
+        mode: '0440'
+
+The about file's templates expected, respectively, to be placed, in my_app module in the following paths:
+
+  - templates/my_app.conf.erb
+  - templates/auth/auth.conf.epp
+
+In the above templates it's possible to use the values of any key we may want to set via my_app::options Hiera key (which expects an Hash of key-pairs):
+
+    my_app::options:
+      listen: 8042
+      servername: "my_app.%{::domain}" # This will be interpolated with the value of the domain fact
+      allowed_ips:
+        - 10.42.0.10
+        - 192.168.0.10
+      users:
+        admin:
+          token: f7e6fEywGqieuerhgdkcxghsaAz87cxtugE
+        guest:
+          token: fdfdskj876BBB98fdsfer32afesdf4gvdfs
+
+The values of that hash can be used as follows. Example within an [erb template](https://puppet.com/docs/puppet/latest/lang_template_erb.html):
+
+    # Configuration file for my_app
+    listen: <%= @options['listen'] %>
+    servername: <%= @options['servername'] %>
+    allowed_ips:
+      <% @options['allowed_ips'].each do |k| -%>
+        - <%= k %>
+      <% end -%>
+
+The values of the options hash can be used in different files, for example $options['users'] key can bve used as follows
+
+    users:
+      <% @options['users'].each do |k,v| -%>
+        <%= k %>:
+          token <%= v['token'] %>
+      <% end -%>
+
+The above examples, within an [erb template](https://puppet.com/docs/puppet/latest/lang_template_erb.html) would look as follows:
+
+    # Configuration file for my_app
+    listen: <%= $my_app::options['listen'] %>
+    servername: <%= $my_app::options['servername'] %>
+    allowed_ips:
+      <% $my_app::options['allowed_ips'].each |$k| {-%>
+        - <%= $k %>
+      <% } -%>
+
+    users:
+      <% $my_app::options['users'].each |$k,$v| { -%>
+        <%= $k %>:
+          token <%= $v['token'] %>
+      <% } -%>
+
+The main differences between erb and epp templates are:
+
+- erb templates embed Ruby code, epp templates embed Puppet code
+- variables coming for the calling class are referred with @varname in erb and $varname in epp
+- internal variables are referred with varname in erb and $varname in epp
+- in epp class variables should be referred with the fully qualified names ($my_app::varname)
+- facts can be referred with just their name in both cases. For example: @fqdn in erb and $fqdn in epp
+- erb templates are passed to the Puppet template() function, epp templates are passed to the epp() function
+
+###  Managing ANY Puppet resource
+
+Besides the resources described above, it's possible, as an *alternative* or *complementary* approach, to define via Hiera data ANY kind of Puppet resource.
+
+This is done by the **my_app::resources** key, which expects an Hash, whose first subkey is the name of the resource to manage which expects as value an Hash of resources of that type, with the relevant parameters.
+
+To reduce data duplication, it's possible to specify, for each resource type, the default parameters with the **my_app::resources_defaults** keys.
+
+Here's an example which creates exactly the same resources created in the above examples
+
+    # The hash of resources to manage, for each resource type you can specifyu an hash of one or more resources with the relevant attributes.
+    my_app::resources:
+      service:
+        my_app:
+          status: '/opt/my_app/bin/my_app status'
+        httpd: {}
+      package:
+        my_app:
+          ensure: 1.0.1
+        my_app_prerequisite:
+          ensure: present
+      user:
+        my_app:
+          ensure: presewnt
+      group:
+        my_app:
+          ensure: presewnt
+      file:
+        /etc/my_app/my_app.conf:
+          content: template(my_app/my_app.conf.erb)
+        /etc/my_app/auth.conf:
+          content: epp(my_app/auth/auth.conf.epp)
+          mode: '0440'      
+
+    # The default values for the attributes for each resource type. If some of them are also set in the resources hash (like ensure: 1.0.1 for package my_app ), they have preferences over these defaults
+    my_app::resources_defaults:
+      service:
+        ensure: running
+        enable: true
+      package:
+        ensure: present
+
+    # The options parameter can still be used and the relevant values used in templates.
+    my_app::options:
+      listen: 8042
+      servername: "my_app.%{::domain}" # This will be interpolated with the value of the domain fact
+      allowed_ips:
+        - 10.42.0.10
+        - 192.168.0.10
+      users:
+        admin:
+          token: f7e6fEywGqieuerhgdkcxghsaAz87cxtugE
+        guest:
+          token: fdfdskj876BBB98fdsfer32afesdf4gvdfs
+
+NOTE: The keys **my_app::resources** and **my_app::resources_defaults** have in configured in [data/common.yaml](data/common.yaml) to use 'deep' as lookup merge behaviour.
+
+With this setting Hiera traverses all the files defined in hiera.yaml to look for they keys and returns an Hash with all the values found for them merged together (when the same subkeys are set, files at the top of the hierarchy have precedence).
+
+Alternatively, if in [data/common.yaml](data/common.yaml) you change to 'first' the lookup_options for these keys then the relevant Hiera keys are looked up using the first method and Hiera returns the first value found for them.
+
+More information on Hiera merge behaviours and how they can be configured in data in module:
+
+- [Official Documentation](https://puppet.com/docs/puppet/5.5/hiera_merging.html)

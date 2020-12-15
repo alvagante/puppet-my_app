@@ -2,5 +2,5 @@
   "manifest": "/tmp/papply/my_app/apply/my_app.pp",
   "destination": "/tmp/papply/my_app",
   "modulepath": "/tmp/papply",
-  "puppet_source": "puppet://puppet.lab.psick.io/apps/my_app" 
+  "puppet_source": "puppet://puppet-pe/zam/my_app" 
 }
