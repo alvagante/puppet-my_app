@@ -37,16 +37,10 @@
 #   You can always specify for each resource type the default parameters via
 #   the my_app::resources_defaults Hiera key.
 #   See below for a sample usage. 
-#   This is not actually a class parameter, but a Hiera key looked up using the
-#   merge behaviour configured via $resources_merge_behaviour
-# @param resources_merge_behaviour Defines the lookup method to use to
-#   retrieve via hiera the my_app::resources key
+#   This key is looked up in deep merge behaviour, are configued in data/common.yaml
 # @param resources_defaults An Hash of resources with an Hash of default
 #   parameters to apply to the relevant resources.
-#   This is not actually a class parameter, but a key looked up using the
-#   merge behaviour configured via $resources_defaults_merge_behaviour
-# @param resources_defaults_merge_behaviour Defines the lookup method to use to
-#   retrieve via hiera the my_app::resources_defaults key
+#   This key is looked up in deep merge behaviour, are configued in data/common.yaml
 #
 # @example Set custom files with relevant options, and manage my_app service
 #   as String and package as Hash, with package version to install.
@@ -105,10 +99,9 @@ class my_app (
   Hash $files                  = { },
   Hash $options                = { },
 
-  # Hash $resources (lookup with $resources_merge_behaviour)                   = {},
-  # Hash $resources_defaults (lookup with $resources_defaults_merge_behaviour) = {},
-  Enum['first','hash','deep'] $resources_merge_behaviour          = 'deep',
-  Enum['first','hash','deep'] $resources_defaults_merge_behaviour = 'deep',
+  Hash $resources              = { },
+  Hash $resources_defaults     = { },
+
 ) {
 
   # Manage service
@@ -176,10 +169,6 @@ class my_app (
       * => $v,
     }
   }
-
-  # Manage generic resources
-  $resources = lookup('my_app::resources',Hash,$resources_merge_behaviour,{})
-  $resources_defaults = lookup('my_app::resources_defaults',Hash,$resources_defaults_merge_behaviour,{})
 
   $resources.each | $k,$v | {
     if $k in keys($resources_defaults) {
