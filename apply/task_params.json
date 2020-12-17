@@ -1,5 +1,5 @@
 {
-  "manifest": "/tmp/papply/my_app/apply/my_app.pp",
+  "manifest": "/tmp/papply/my_app/apply/apply.pp",
   "destination": "/tmp/papply/my_app",
   "modulepath": "/tmp/papply",
   "puppet_source": "puppet://puppet/zam/rms/my_app" 

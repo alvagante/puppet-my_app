@@ -47,7 +47,7 @@ The following Hiera keys can be used to managed Puppet resources related to my_a
 
 Just include my_app class to allow all the Hiera driven settings described below.
 
-In apply mode, you can just apply the file [apply/my_app.pp](apply/my_app.pp).
+In apply mode, you can just apply the file [apply/apply.pp](apply/apply.pp).
 
 This can be done from a central node with access to Puppet Enterprise Console API and a valid token, by running the script [apply/deploy.sh](apply/deploy.sh) passing as argument the node where to apply the code (and deploy my_app).
 
@@ -281,6 +281,6 @@ It's possible to test this module locally, without the need of running puppet ap
 
 In order to do this, assuming the module is stored under /var/tmp/modules/, it's enough to run:
 
-    puppet apply --modulepath=/var/tmp/modules/ /var/tmp/modules/my_app/apply/my_app.pp
+    puppet apply --modulepath=/var/tmp/modules/ /var/tmp/modules/my_app/apply/apply.pp
 
 This command can be run as root or also as a normal user, just notice that if run as normal user it may fail to apply resources which need root permissions (like installing packages, managing services, creating files with root owner and so on).
