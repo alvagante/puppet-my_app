@@ -8,11 +8,11 @@ defaults:
 hierarchy:
   - name: "Custom hierarchy"
     paths:
-      - "hostname/%{::trusted.certname}.yaml"
-      - "application/%{::application}-%{::env}.yaml"
-      - "application/%{::application}.yaml"
-      - "role/%{::role}.yaml"
-      - "datacenter/%{::datacenter}.yaml"
+      - "hostname/%{::fqdn}.yaml"
+      - "application/%{::dtt_application}-%{::dtt_env}.yaml"
+      - "application/%{::dtt_application}.yaml"
+      - "role/%{::dtt_role}.yaml"
+      - "datacenter/%{::ddt_datacenter}.yaml"
   - name: "OS based changes"
     paths:
       - "os/%{facts.os.name}/%{facts.os.release.major}.yaml"

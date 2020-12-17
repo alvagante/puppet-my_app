@@ -76,7 +76,7 @@ or, as a Hash:
         status: '/opt/my_app/bin/my_app status'
       httpd: {}
 
-The default attributes added to each service tyupe (or merged to the ones passed in the my_app::service Hash), can be configured as well. These are the default values:
+The default attributes added to each service type (or merged to the ones passed in the my_app::service Hash), can be configured as well. These are the default values:
 
     my_app::service_params:
       ensure: running
@@ -184,7 +184,7 @@ The values of the options hash can be used in different files, for example $opti
           token <%= v['token'] %>
       <% end -%>
 
-The above examples, within an [erb template](https://puppet.com/docs/puppet/latest/lang_template_erb.html) would look as follows:
+The above examples, within an [epp template](https://puppet.com/docs/puppet/latest/lang_template_epp.html) would look as follows:
 
     # Configuration file for my_app
     listen: <%= $my_app::options['listen'] %>
@@ -219,7 +219,7 @@ To reduce data duplication, it's possible to specify, for each resource type, th
 
 Here's an example which creates exactly the same resources created in the above examples
 
-    # The hash of resources to manage, for each resource type you can specifyu an hash of one or more resources with the relevant attributes.
+    # The hash of resources to manage, for each resource type you can specify an hash of one or more resources with the relevant attributes.
     my_app::resources:
       service:
         my_app:
@@ -232,10 +232,10 @@ Here's an example which creates exactly the same resources created in the above 
           ensure: present
       user:
         my_app:
-          ensure: presewnt
+          ensure: present
       group:
         my_app:
-          ensure: presewnt
+          ensure: present
       file:
         /etc/my_app/my_app.conf:
           content: template(my_app/my_app.conf.erb)
@@ -273,3 +273,14 @@ Alternatively, if in [data/common.yaml](data/common.yaml) you change to 'first' 
 More information on Hiera merge behaviours and how they can be configured in data in module:
 
 - [Official Documentation](https://puppet.com/docs/puppet/5.5/hiera_merging.html)
+
+
+## Testing the module locally
+
+It's possible to test this module locally, without the need of running puppet apply via a task.
+
+In order to do this, assuming the module is stored under /var/tmp/modules/, it's enough to run:
+
+    puppet apply --modulepath=/var/tmp/modules/ /var/tmp/modules/my_app/apply/my_app.pp
+
+This command can be run as root or also as a normal user, just notice that if run as normal user it may fail to apply resources which need root permissions (like installing packages, managing services, creating files with root owner and so on).
