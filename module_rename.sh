@@ -16,4 +16,4 @@ for file in $( grep -R "$OLDSTRING" . | grep -v ".git" | cut -d ":" -f 1 ) ; do
 done
 
 mv apply/$1.pp apply/$2.pp
-my spec/classes/$1_spec.rb spec/classes/$2_spec.rb
+mv spec/classes/$1_spec.rb spec/classes/$2_spec.rb
