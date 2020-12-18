@@ -16,6 +16,12 @@ puppet_options="--detailed-exitcodes"
 [[ -n "${PT_tags}" ]] && puppet_options="${puppet_options} --tags ${PT_tags}"
 [[ -n "${PT_modulepath}" ]] && puppet_options="${puppet_options} --modulepath ${PT_modulepath}"
 [[ -n "${PT_environment}" ]] && puppet_options="${puppet_options} --environment ${PT_environment}"
+if [[ "${PT_purge_destination}" == "true" ]]; then
+  PURGE=", purge => true, force => true "
+else
+  PURGE=''
+fi
+
 readonly puppet_options
 
 if [[ "x${PT_git_source}" != "x" ]]; then
@@ -61,7 +67,7 @@ fi
 if [[ "x${PT_puppet_source}" != "x" ]]; then
   command -v puppet &>/dev/null || { echo "command puppet not found!" && exit 1; }
   mkdir -p $PT_destination
-  puppet apply -e "file { \"${PT_destination}\": source => \"${PT_puppet_source}\", ensure => directory, recurse => true }" 
+  puppet apply -e "file { \"${PT_destination}\": source => \"${PT_puppet_source}\", ensure => directory, recurse => true $PURGE}" 
 fi
 
 if [[ "x${PT_puppet_source_tgz}" != "x" ]]; then

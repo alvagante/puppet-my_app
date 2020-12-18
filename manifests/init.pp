@@ -110,7 +110,7 @@ class my_app (
       service { $service:
         * => $service_params,
       }
-      $file_notify = $service
+      $file_notify = Service[$service]
     }
     Array: {
       $service.each | $s | {
@@ -118,7 +118,7 @@ class my_app (
           * => $service_params,
         }
       }
-      $file_notify = $service
+      $file_notify = Service[$service]
     }
     Hash: {
       $service.each | $s,$p | {
@@ -126,7 +126,7 @@ class my_app (
           * => $service_params + $p,
         }
       }
-      $file_notify = keys($service)
+      $file_notify = Service[keys($service)]
     }
     default: {}
   }
@@ -170,6 +170,19 @@ class my_app (
     }
   }
 
+  # Manage User and Group
+  if $user_create {
+    user { $user:
+      * => $user_params
+    }
+  }
+  if $group_create {
+    group { $group:
+      * => $group_params
+    }
+  }
+
+  # Manage extra resources
   $resources.each | $k,$v | {
     if $k in keys($resources_defaults) {
       $resource_defaults = $resources_defaults[$k]

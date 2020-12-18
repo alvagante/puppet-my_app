@@ -30,6 +30,10 @@
       "description": "Specify the destination dir where to clone the git_source or extract the zip_source and tgz_source",
      "type": "Optional[String]"
     },
+    "purge_destination": {
+      "description": "If to force purging of destination dir (DO NOT set to true if destination already contains files or dirs you don't want to lose!)",
+     "type": "Optional[Boolean]"
+    },
     "modulepath": {
      "description": "Specify the moduletpath to use",
      "type": "Optional[String[1]]"
