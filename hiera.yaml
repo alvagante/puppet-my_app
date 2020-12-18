@@ -12,7 +12,7 @@ hierarchy:
       - "application/%{::dtt_application}-%{::dtt_env}.yaml"
       - "application/%{::dtt_application}.yaml"
       - "role/%{::dtt_role}.yaml"
-      - "datacenter/%{::ddt_datacenter}.yaml"
+      - "datacenter/%{::dtt_datacenter}.yaml"
   - name: "OS based changes"
     paths:
       - "os/%{facts.os.name}/%{facts.os.release.major}.yaml"
