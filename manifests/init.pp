@@ -165,8 +165,20 @@ class my_app (
   }
 
   $files.each | $k,$v | {
+    if 'template' in keys($v) {
+      $content_param = {
+        content => template($v['template']),
+      }
+    } elsif 'epp' in keys($v) {
+      $content_param = {
+        content => epp($v['epp']),
+      }
+    } else {
+      $content_param = {}
+    }
+
     file { $k:
-      * => $v,
+      * => $content_param + $v - ['template','epp'],
     }
   }
 
