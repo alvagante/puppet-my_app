@@ -30,7 +30,7 @@ Normal expected usage of this module is via a Puppet task which runs puppet appl
 The script [apply/deploy.sh](apply/deploy.sh) is a shell wrapper around a **puppet task run** command to be executed from central control node which has access to Puppet Enterprise console API. The user running the script need to have a valid
  token created and not expired (as created via the **puppet access** command) with the permission to run the TASK 
 
-### What my_app affects 
+### What my_app affects
 
 This module manages different kind of Puppet resources according what's configured on Hiera.
 
@@ -142,15 +142,27 @@ Any configuration file related to my_app can be configured via an Hash of Puppet
 
     my_app::files:
       /etc/my_app/my_app.conf:
-        content: template(my_app/my_app.conf.erb)
+        template: my_app/my_app.conf.erb
       /etc/my_app/auth.conf:
-        content: epp(my_app/auth/auth.conf.epp)
+        epp: my_app/auth/auth.conf.epp
         mode: '0440'
+      /etc/my_app/groups:
+        content: 'admins: al,ma,sh'
+        mode: '0640'
+      /etc/my_app/keys:
+        source: puppet:///modules/my_app/keys
+        mode: '0400'
 
-The about file's templates expected, respectively, to be placed, in my_app module in the following paths:
+From the above example note that for better handling of the content of files, besides the normal attributes of the file resource (path, onwer, group, mode, content, source...) you can also specify the erb template to use with the **template** key, or the epp template with the **epp** key (writing something like: content: template(my_app/spaced.erb) would not work).
+
+The above templates are expected, respectively, to be placed, in my_app module in the following paths:
 
   - templates/my_app.conf.erb
   - templates/auth/auth.conf.epp
+
+the static file should be placed under:
+
+  - files/keys
 
 In the above templates it's possible to use the values of any key we may want to set via my_app::options Hiera key (which expects an Hash of key-pairs):
 
@@ -200,6 +212,14 @@ The above examples, within an [epp template](https://puppet.com/docs/puppet/late
           token <%= $v['token'] %>
       <% } -%>
 
+For common configuration files' structures, under the templates directory, there are some generic templates both in erp and epp format which can be used to iterate over all the keys specified under the **options** parameter:
+
+- **inifile**. For configuration files in inifile format (key = value)
+- **spaced**. For configuration files with spaced format (key value)
+- **inifile_with_stanzas**. For configuration files in inifile format with stanzas (like smb.conf).
+- **spaced_with_stanzas**. For configuration files in spaced format with stanzas.
+
+
 The main differences between erb and epp templates are:
 
 - erb templates embed Ruby code, epp templates embed Puppet code
@@ -238,10 +258,18 @@ Here's an example which creates exactly the same resources created in the above 
           ensure: present
       file:
         /etc/my_app/my_app.conf:
-          content: template(my_app/my_app.conf.erb)
+          template: my_app/spaced.erb
         /etc/my_app/auth.conf:
-          content: epp(my_app/auth/auth.conf.epp)
-          mode: '0440'      
+          epp: my_app/auth/auth.conf.epp
+          mode: '0440'
+        /etc/my_app/groups:
+          content: 'admins: al,ma,sh'
+           mode: '0640'
+        /etc/my_app/keys:
+          source: puppet:///modules/my_app/keys
+          mode: '0400'
+
+From the above example note that for better handling of the content of files, besides the normal attributes of the file resource (path, onwer, group, mode, content, source...) you can also specify the erb template to use with the **template** key, or the epp template with the **epp** key (writing something like: content: template(my_app/spaced.erb) would not work).
 
     # The default values for the attributes for each resource type. If some of them are also set in the resources hash (like ensure: 1.0.1 for package my_app ), they have preferences over these defaults
     my_app::resources_defaults:
@@ -284,3 +312,20 @@ In order to do this, assuming the module is stored under /var/tmp/modules/, it's
     puppet apply --modulepath=/var/tmp/modules/ /var/tmp/modules/my_app/apply/apply.pp
 
 This command can be run as root or also as a normal user, just notice that if run as normal user it may fail to apply resources which need root permissions (like installing packages, managing services, creating files with root owner and so on).
+
+
+## Creating a new module based on my_app
+
+The script **module_rename.sh** is available to quickly create a new module based on my_app module.
+
+In order to use it, run the following commands:
+
+    cd $modulepath/my_app
+    bash module_rename.sh my_app new_module_name
+
+    cd ..
+    mv my_app new_module_name
+
+The **module_rename.sh** basically finds and replaces the my_app string with what you specify as new_module_name.
+
+
