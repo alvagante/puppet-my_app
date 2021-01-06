@@ -1,0 +1,7 @@
+# File managed by Puppet
+<% $my_app::options.each |$k,$v| { -%>
+[<%= $k %>]
+<% $v.each |$kk,$vv| { -%>
+  <%= $kk %> = <%= $vv %>
+<% } -%>
+<% } -%>
