@@ -38,10 +38,10 @@ The following Hiera keys can be used to managed Puppet resources related to my_a
 
 - **my_app::service**, to manage one or more services
 - **my_app::package**, to manage one or more packages
-- **my_app::user**, to manage a user
-- **my_app::group**, to manage a group
+- **my_app::user**, to manage one or more users
+- **my_app::group**, to manage one or more groups
 - **my_app::files**, to manage one or more files
-- **my_app::resources**, an altenrative, general purpose, entrypoint to manage any kind of Puppet resource
+- **my_app::resources**, an alternative, general purpose, entrypoint to manage any kind of Puppet resource
 
 ### Beginning with my_app
 
@@ -116,12 +116,11 @@ The default parameters added to each package (or merged to the ones present in t
 
 Additional Users and groups can be automatically used as owners of the configuration files provided, and eventually created as Puppet Resource.
 
-To set owner and group of each managed file (by default these are not set and files are owned by root):
+Users and groups can be defined exactly as packages and services, providing A String, and Array of an Hash of resources for the Hiera keys **my_app::user** and **my_app::group**.
 
-    my_app::user: my_app
-    my_app::group: my_app
+If the value is a string the that user or group is used as owner of all the managed files, if it's an Array or and Hash, then the first element is used. Note howverwe that you can always override this by specifying different user and groups in the file resources.
 
-To actually manage the above user and group via the relevant Puppet resources (by default they are not explicitly created):
+To actually create users and groups via the relevant Puppet resources (by default they are not explicitly created):
 
     my_app::user_create: true
     my_app::group_create: true
