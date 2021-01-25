@@ -1,0 +1,6 @@
+# File managed by Puppet
+# Sample configuration
+
+<% $::my_app::options['users'].each | $k , $v | { -%>
+<%= $k %> <%= $v %>
+<% } -%>

@@ -1,0 +1,56 @@
+---
+## Example data/common.yaml file for a web application for which where we manage:
+# - a package (nginx)
+# - a service (nginx)
+# - a user (my_app)
+# - a group (my_app)
+# - a directory two configuration files with custom templates and options
+
+my_app::service: nginx
+my_app::service_params:
+  ensure: running
+  enable: true
+my_app::service_notify: true
+
+my_app::package: nginx
+my_app::package_params:
+  ensure: present
+
+my_app::user: my_app
+my_app::user_create: true
+my_app::user_params:
+  ensure: present
+
+my_app::group: my_app
+my_app::group_create: true
+my_app::group_params:
+  ensure: present
+
+my_app::files:
+  /etc/my_app:
+    ensure: directory
+  /etc/my_app/my_app.conf:
+    template: my_app/sample/sample.conf.erb
+  /etc/my_app/users.conf:
+    template: my_app/sample/users.conf.epp
+
+my_app::options:
+  listen: "%{ipaddress}"
+  port: 4242
+  users:
+    al: s3cr3t
+    ma: s4cr3d
+
+my_app::resources: {}
+my_app::resources_defaults: {}
+
+# For resources and resources_defaults we override the default 'first' merge behaviour 
+lookup_options:
+  my_app::resources:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"
+  my_app::resources_defaults:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"

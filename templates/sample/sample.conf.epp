@@ -1,0 +1,7 @@
+# File managed by Puppet
+# Sample configuration (in epp format)
+
+listen: <%= $::my_app::options['listen'] %>
+port: <%= $::my_app::options['port'] %>
+keepalive: yes
+

@@ -238,19 +238,28 @@ class my_app (
 
   $files.each | $k,$v | {
     if 'template' in keys($v) {
-      $content_param = {
-        content => template($v['template']),
-      }
-    } elsif 'epp' in keys($v) {
-      $content_param = {
-        content => epp($v['epp']),
+      $template_ext=$v['template'][-4,4]
+      case $template_ext {
+        '.epp': {
+          $content_param = {
+            content => epp($v['template']),
+          }
+        }
+        '.erb': {
+          $content_param = {
+            content => template($v['template']),
+          }
+        }
+        default: {
+          fail("Template parameter in ${files} MUST contain a string with .erb or .epp suffix")
+        }
       }
     } else {
       $content_param = {}
     }
 
     file { $k:
-      * => $content_param + $v - ['template','epp'],
+      * => $content_param + $v - ['template'],
     }
   }
 

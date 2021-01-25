@@ -1,0 +1,41 @@
+---
+# File with default blank settings for data/common.yaml
+# With these settings the my_app class does not manage any resource
+
+my_app::service: ~
+my_app::service_params:
+  ensure: running
+  enable: true
+my_app::service_notify: true
+
+my_app::package: ~
+my_app::package_params:
+  ensure: present
+
+my_app::user: ~
+my_app::user_create: false
+my_app::user_params:
+  ensure: present
+
+my_app::group: ~
+my_app::group_create: false
+my_app::group_params:
+  ensure: present
+
+my_app::files: {}
+
+my_app::options: {}
+
+my_app::resources: {}
+my_app::resources_defaults: {}
+
+# For resources and resources_defaults we override the default 'first' merge behaviour 
+lookup_options:
+  my_app::resources:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"
+  my_app::resources_defaults:
+    merge:
+      strategy: deep
+      knockout_prefix: "--"
